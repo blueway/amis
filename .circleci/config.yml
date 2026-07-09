@@ -17,12 +17,12 @@ jobs:
             pnpm --version
       - restore_cache:
           keys:
-            - pnpm-store-v1
+            - pnpm-store-v2
       - run:
           name: pnpm install
           command: pnpm install --no-frozen-lockfile
       - save_cache:
-          key: pnpm-store-v1
+          key: pnpm-store-v2
           paths:
             - ~/.local/share/pnpm/store
             - ~/.pnpm-store
