@@ -35,22 +35,20 @@ jobs:
           name: build amis-core
           command: pnpm --filter amis-core run build
       - run:
-          name: build amis-ui
-          command: pnpm --filter amis-ui run build
-      - run:
-          name: build amis
-          command: pnpm --filter amis run build
-      - run:
           name: typescript check
           command: pnpm run typecheck
       - run:
-          name: test
-          no_output_timeout: 30m
-          command: |
-            pnpm --filter amis-formula run test
-            pnpm --filter amis-core run test
-            pnpm --filter amis-ui run test
-            pnpm --filter amis run test || true
+          name: test amis-formula
+          command: pnpm --filter amis-formula run test
+      - run:
+          name: test amis-core
+          command: pnpm --filter amis-core run test
+      - run:
+          name: test amis-ui
+          command: pnpm --filter amis-ui run test
+      - run:
+          name: test amis
+          command: pnpm --filter amis run test
 
   build:
     docker:
