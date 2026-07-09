@@ -13,19 +13,19 @@ jobs:
           name: Enable pnpm (corepack)
           command: |
             corepack enable
-            corepack prepare pnpm@9 --activate
+            corepack prepare pnpm@10 --activate
             pnpm --version
       - restore_cache:
           keys:
-            - pnpm-store-v1-{{ checksum "pnpm-lock.yaml" }}
-            - pnpm-store-v1-
+            - pnpm-store-v1
       - run:
           name: pnpm install
-          command: pnpm install --legacy-peer-deps --frozen-lockfile=false
+          command: pnpm install --no-frozen-lockfile
       - save_cache:
-          key: pnpm-store-v1-{{ checksum "pnpm-lock.yaml" }}
+          key: pnpm-store-v1
           paths:
             - ~/.local/share/pnpm/store
+            - ~/.pnpm-store
             - node_modules
             - packages/*/node_modules
       - run:
@@ -45,7 +45,7 @@ jobs:
           command: |
             pnpm -r --if-present test
             cd packages/office-viewer
-            pnpm install --legacy-peer-deps
+            pnpm install --no-frozen-lockfile
             pnpm test
             cd ../../
 
