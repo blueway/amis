@@ -35,6 +35,11 @@ jobs:
           name: typescript check
           command: pnpm run typecheck
       - run:
+          name: build deps for test
+          command: |
+            pnpm --filter amis-formula run build
+            pnpm --filter amis-core run build
+      - run:
           name: test
           command: |
             pnpm -r --if-present test
