@@ -26,16 +26,11 @@ jobs:
       - run:
           name: pnpm install
           command: pnpm install --no-frozen-lockfile
-      - run:
-          name: Rebuild canvas native module
-          command: pnpm rebuild canvas 2>/dev/null || true
       - save_cache:
           key: pnpm-store-v2
           paths:
             - ~/.local/share/pnpm/store
             - ~/.pnpm-store
-            - node_modules
-            - packages/*/node_modules
       - run:
           name: typescript check
           command: pnpm run typecheck
