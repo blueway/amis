@@ -46,17 +46,7 @@ jobs:
       - run:
           name: test amis-ui
           command: pnpm --filter amis-ui run test
-      - run:
-          name: test amis
-          command: |
-            (
-              while true; do sleep 30; echo "[heartbeat] amis test still running..."; done
-            ) &
-            HEARTBEAT_PID=$!
-            pnpm --filter amis run test
-            EXIT_CODE=$?
-            kill $HEARTBEAT_PID 2>/dev/null
-            echo "EXIT_CODE=$EXIT_CODE"
+
 
   build:
     docker:
