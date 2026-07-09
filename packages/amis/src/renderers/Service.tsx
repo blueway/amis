@@ -279,6 +279,7 @@ export default class Service extends React.Component<ServiceProps> {
     if (this.socket && this.socket.close) {
       this.socket.close();
     }
+    this.props.store.dispose();
   }
 
   doAction(
@@ -914,6 +915,7 @@ export class ServiceRenderer extends Service {
     super.componentWillUnmount();
     const scoped = this.context as IScopedContext;
     scoped.unRegisterComponent(this as ScopedComponentType);
+    this.props.store.dispose();
   }
 
   reloadTarget(target: string, data?: any) {

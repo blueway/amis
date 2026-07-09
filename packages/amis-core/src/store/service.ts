@@ -19,6 +19,7 @@ export const ServiceStore = iRendererStore
     busying: false,
     checking: false,
     initializing: false,
+    disposed: false,
     schema: types.optional(types.frozen(), null),
     schemaKey: ''
   })
@@ -553,6 +554,18 @@ export const ServiceStore = iRendererStore
       }
     });
 
+    function dispose() {
+      self.disposed = true;
+      if (fetchCancel) {
+        fetchCancel();
+        fetchCancel = null;
+      }
+      if (fetchSchemaCancel) {
+        fetchSchemaCancel();
+        fetchSchemaCancel = null;
+      }
+    }
+
     return {
       markFetching,
       markSaving,
@@ -565,7 +578,8 @@ export const ServiceStore = iRendererStore
       setHasRemoteData,
       saveRemote,
       fetchSchema,
-      checkRemote
+      checkRemote,
+      dispose
     };
   });
 
