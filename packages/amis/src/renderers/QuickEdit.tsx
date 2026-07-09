@@ -12,10 +12,28 @@ import {
   difference,
   getPropValue,
   getRendererByName,
+  getVariable,
   noop,
   setVariable
 } from 'amis-core';
 import hoistNonReactStatic from 'hoist-non-react-statics';
+
+// 判断两个值是否在数据层面相等：数值相等即视为相等（兼容 "25.10000" 与 25.1 这类精度/类型差异）
+function isSameDataValue(a: any, b: any): boolean {
+  if (a === b) {
+    return true;
+  }
+  const isNumeric = (v: any) =>
+    v !== '' &&
+    v !== null &&
+    v !== undefined &&
+    !isNaN(Number(v)) &&
+    (typeof v === 'number' || typeof v === 'string');
+  if (isNumeric(a) && isNumeric(b)) {
+    return Number(a) === Number(b);
+  }
+  return false;
+}
 import {ActionObject} from 'amis-core';
 import keycode from 'keycode';
 import {Overlay} from 'amis-core';
@@ -340,7 +358,15 @@ export const HocQuickEdit =
         const {onQuickChange, data} = this.props;
 
         const diff = difference(values, data);
-        Object.keys(diff).length && onQuickChange(diff, false, true);
+        // 过滤掉与原始数据数值相等（仅精度/类型不同，如 25.10000 与 25.1）的差异，
+        // 避免初始化时无效的 onQuickChange 触发整表重渲染（#10724）
+        const realDiff: any = {};
+        Object.keys(diff).forEach(key => {
+          if (!isSameDataValue(diff[key], getVariable(data, key))) {
+            realDiff[key] = diff[key];
+          }
+        });
+        Object.keys(realDiff).length && onQuickChange(realDiff, false, true);
       }
 
       handleChange(values: object, diff?: any) {
@@ -356,12 +382,18 @@ export const HocQuickEdit =
       }
 
       handleFormItemChange(value: any) {
-        const {onQuickChange, quickEdit, name} = this.props;
+        const {onQuickChange, quickEdit, name, data} = this.props;
 
-        const data = {};
-        setVariable(data, name!, value);
+        // 初始化时部分表单项（如 input-number）会把 "25.10000" 规范化为 25.1，
+        // 与原始数据数值相等，无需向上触发 onQuickChange，避免整表重渲染（#10724）
+        if (isSameDataValue(value, getVariable(data, name!))) {
+          return;
+        }
+
+        const payload = {};
+        setVariable(payload, name!, value);
         onQuickChange(
-          data,
+          payload,
           (quickEdit as QuickEditConfig).saveImmediately,
           false,
           quickEdit as QuickEditConfig

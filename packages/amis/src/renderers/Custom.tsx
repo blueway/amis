@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import * as ReactDOMClient from 'react-dom/client';
 import memoize from 'lodash/memoize';
 import isString from 'lodash/isString';
 import {AMISSchemaBase, Renderer, RendererProps} from 'amis-core';
@@ -65,6 +66,28 @@ const getFunction = memoize(
   },
   (...args) => JSON.stringify(args)
 );
+
+// React 18/19 使用 createRoot，避免直接使用已废弃/移除的 ReactDOM.render（#11361）
+const customRoots = new WeakMap<Element, any>();
+
+function renderCustomChild(child: React.ReactElement, container: Element) {
+  let root = customRoots.get(container);
+  if (!root) {
+    root = ReactDOMClient.createRoot(container as any);
+    customRoots.set(container, root);
+  }
+  root.render(child);
+}
+
+function unmountCustomChild(container: Element) {
+  const root = customRoots.get(container);
+  if (root) {
+    root.unmount();
+    customRoots.delete(container);
+  } else if ((ReactDOM as any).unmountComponentAtNode) {
+    (ReactDOM as any).unmountComponentAtNode(container);
+  }
+}
 
 export class Custom extends React.Component<CustomProps, object> {
   static defaultProps: Partial<CustomProps> = {
@@ -171,7 +194,7 @@ export class Custom extends React.Component<CustomProps, object> {
   unmountChildElem() {
     if (this.childElemArr && this.childElemArr.length > 0) {
       this.childElemArr.forEach(childElemItem =>
-        ReactDOM.unmountComponentAtNode(childElemItem)
+        unmountCustomChild(childElemItem)
       );
     }
   }
@@ -198,9 +221,8 @@ export class Custom extends React.Component<CustomProps, object> {
     }
     if (childSchema && curInsertElemDom) {
       const childHTMLElem = render(schemaPosition, childSchema);
-      childEleCont = ReactDOM.render(childHTMLElem, curInsertElemDom, () => {
-        this.recordChildElem(curInsertElemDom);
-      });
+      renderCustomChild(childHTMLElem, curInsertElemDom);
+      this.recordChildElem(curInsertElemDom);
     }
     return childEleCont;
   }

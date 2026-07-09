@@ -563,7 +563,7 @@ export function validate(
       //   {error: true, msg: '错误提示'}
       // 格式的信息来灵活展示错误
       let fnResErrorMsg = '';
-      if (typeof validateRes === 'object' && validateRes.error === true) {
+      if (typeof validateRes === 'object' && validateRes?.error === true) {
         fnResErrorMsg = validateRes?.msg ?? '';
       }
 

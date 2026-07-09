@@ -80,9 +80,12 @@ export class QueryBuilder extends React.Component<
 
   @autobind
   handleDragStart(e: React.DragEvent) {
-    const {draggable = true} = this.props;
-    // draggable为false时不可拖拽
-    if (!draggable) return;
+    const {draggable = true, disabled} = this.props;
+    // draggable为false或disabled时不可拖拽
+    if (!draggable || disabled) {
+      e.preventDefault();
+      return;
+    }
     const target = e.currentTarget;
     const item = target.closest('[data-id]') as HTMLElement;
     this.dragTarget = item;

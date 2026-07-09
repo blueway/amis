@@ -306,6 +306,13 @@ export default class Editor extends Component<EditorProps> {
     this.toDispose.forEach(fn => fn());
     this.toDispose = [];
     this.manager.dispose();
+    // 清理全局引用，避免已销毁的 store 无法被 GC 造成内存泄漏（#11181）
+    if (
+      !this.props.isSubEditor &&
+      (window as any).editorStore === this.store
+    ) {
+      delete (window as any).editorStore;
+    }
     setTimeout(() => destroy(this.store), 4);
   }
 

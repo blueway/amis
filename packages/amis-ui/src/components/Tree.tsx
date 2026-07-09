@@ -731,6 +731,9 @@ export class TreeSelector extends React.Component<
       }
     }
 
+    // 虚拟列表（VirtualList 为 PureComponent）在 checkbox 状态变化时不会自动重渲染，
+    // 这里让 renderItem 引用变化以强制其回显选中态（#12193）
+    this.renderItem = this.renderItem.bind(this);
     this.setState(
       {
         value: [...value]
@@ -1637,7 +1640,8 @@ export class TreeSelector extends React.Component<
     const {virtualThreshold} = this.props;
     const {virtualHeight, itemHeight} = this.state;
     if (virtualThreshold && list.length > virtualThreshold) {
-      return itemHeight ? (
+      // virtualHeight 计算失败（容器无高度等）时降级为非虚拟渲染，避免白屏（#12130）
+      return itemHeight && virtualHeight > 0 ? (
         <div ref={this.virtualListRefSetter}>
           <VirtualList
             height={virtualHeight}

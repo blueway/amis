@@ -32,12 +32,13 @@ const fadeStyles: {
   [EXITING]: 'out'
 };
 
-let toastRef: any = null;
+// 支持同一个页面渲染多个 amis 应用时，toast 能正确显示到各自应用内（#12062）
+let toastRefs: Array<any> = [];
 const show = (content: string, conf: any = {}, method: string) => {
-  if (!toastRef || !toastRef[method]) {
-    return;
-  }
-  toastRef[method](content, {...conf});
+  // 向所有已挂载的 ToastComponent 广播，避免单例被最后挂载的实例覆盖
+  toastRefs
+    .filter(ref => ref && ref[method])
+    .forEach(ref => ref[method](content, {...conf}));
 };
 
 export type ToastLevel = 'info' | 'success' | 'error' | 'warning';
@@ -122,12 +123,12 @@ export class ToastComponent extends React.Component<
 
   componentDidMount() {
     this.hasRendered = true;
-    toastRef = this;
+    toastRefs.push(this);
   }
 
   componentWillUnmount() {
     if (this.hasRendered) {
-      toastRef = null;
+      toastRefs = toastRefs.filter(ref => ref !== this);
     }
   }
 
@@ -187,7 +188,7 @@ export class ToastComponent extends React.Component<
   }
 
   render() {
-    if (toastRef && !this.hasRendered) {
+    if (!this.hasRendered) {
       return null;
     }
 
@@ -425,7 +426,9 @@ export class ToastMessage extends React.Component<
 }
 
 export const toast = {
-  container: toastRef,
+  get container() {
+    return toastRefs[0] || null;
+  },
   success: (content: string, conf?: any) => show(content, conf, 'success'),
   error: (content: string, conf?: any) => show(content, conf, 'error'),
   info: (content: string, conf?: any) => show(content, conf, 'info'),

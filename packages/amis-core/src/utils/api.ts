@@ -478,7 +478,7 @@ export function responseAdaptor(ret: fetcherResult, api: ApiObject) {
   } else if (data.hasOwnProperty('error')) {
     // Google JSON guide
     // https://google.github.io/styleguide/jsoncstyleguide.xml#error
-    if (typeof data.error === 'object' && data.error.hasOwnProperty('code')) {
+    if (typeof data.error === 'object' && data.error && data.error.hasOwnProperty('code')) {
       data.status = data.error.code;
       data.msg = data.error.message;
     } else {
