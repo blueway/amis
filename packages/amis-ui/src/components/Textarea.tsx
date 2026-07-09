@@ -18,6 +18,11 @@ export interface TextAreaProps extends ThemeProps, LocaleProps {
   minRows?: number;
 
   /**
+   * 启用原生 textarea，跳过 react-textarea-autosize 的高度测量，适用于高频输入场景
+   */
+  nativeTextarea?: boolean;
+
+  /**
    * 是否只读
    */
   readOnly?: boolean;
@@ -186,7 +191,8 @@ export class Textarea extends React.Component<TextAreaProps, TextAreaState> {
       showCounter,
       clearable,
       testIdBuilder,
-      style
+      style,
+      nativeTextarea
     } = this.props;
     const counter = showCounter ? this.valueToString(value).length : 0;
 
@@ -203,27 +209,47 @@ export class Textarea extends React.Component<TextAreaProps, TextAreaState> {
         )}
         style={style}
       >
-        <BaseTextArea
-          className={cx(`TextareaControl-input`, {
-            'TextareaControl-input--counter': showCounter
-          })}
-          autoComplete="off"
-          ref={this.inputRef}
-          name={name}
-          disabled={disabled}
-          value={this.valueToString(value)}
-          placeholder={placeholder}
-          autoCorrect="off"
-          spellCheck="false"
-          maxLength={maxLength}
-          readOnly={readOnly}
-          minRows={minRows || undefined}
-          maxRows={maxRows || undefined}
-          onChange={this.handleChange}
-          onFocus={this.handleFocus}
-          onBlur={this.handleBlur}
-          {...testIdBuilder?.getTestId()}
-        />
+        {nativeTextarea ? (
+          <textarea
+            className={cx(`TextareaControl-input`, {
+              'TextareaControl-input--counter': showCounter
+            })}
+            ref={this.inputRef}
+            name={name}
+            disabled={disabled}
+            value={this.valueToString(value)}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            readOnly={readOnly}
+            rows={minRows || 3}
+            onChange={this.handleChange}
+            onFocus={this.handleFocus}
+            onBlur={this.handleBlur}
+            {...testIdBuilder?.getTestId()}
+          />
+        ) : (
+          <BaseTextArea
+            className={cx(`TextareaControl-input`, {
+              'TextareaControl-input--counter': showCounter
+            })}
+            autoComplete="off"
+            ref={this.inputRef}
+            name={name}
+            disabled={disabled}
+            value={this.valueToString(value)}
+            placeholder={placeholder}
+            autoCorrect="off"
+            spellCheck="false"
+            maxLength={maxLength}
+            readOnly={readOnly}
+            minRows={minRows || undefined}
+            maxRows={maxRows || undefined}
+            onChange={this.handleChange}
+            onFocus={this.handleFocus}
+            onBlur={this.handleBlur}
+            {...testIdBuilder?.getTestId()}
+          />
+        )}
 
         {clearable && !disabled && value ? (
           <a onClick={this.handleClear} className={cx('TextareaControl-clear')}>

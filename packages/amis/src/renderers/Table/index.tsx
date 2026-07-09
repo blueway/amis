@@ -2901,6 +2901,8 @@ export default class Table<
     // 理论上来说 store.rows 应该也行啊
     // 不过目前看来只有这样写它才会重新更新视图
     store.rows.length;
+    store.orderBy;
+    store.orderDir;
 
     return (
       <>

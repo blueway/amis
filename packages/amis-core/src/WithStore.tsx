@@ -235,19 +235,21 @@ export function HocStoreFactory(renderer: {
             ? renderer.extendsData(props)
             : renderer.extendsData;
         if (extendsData === false) {
+          const hasExprDataChanged = props.trackExpression
+            ? tokenize(props.trackExpression, props.data!) !==
+              tokenize(props.trackExpression, prevProps.data!)
+            : isObjectShallowModified(prevProps.data, props.data);
+
+          const hasSuperChanged =
+            props.data &&
+            prevProps.data &&
+            props.data.__super !== prevProps.data.__super;
+
           if (
             shouldSync === true ||
             prevProps.defaultData !== props.defaultData ||
-            (props.trackExpression
-              ? tokenize(props.trackExpression, props.data!) !==
-                tokenize(props.trackExpression, prevProps.data!)
-              : isObjectShallowModified(prevProps.data, props.data) ||
-                //
-                // 特殊处理 CRUD。
-                // CRUD 中 toolbar 里面的 data 是空对象，但是 __super 会不一样
-                (props.data &&
-                  prevProps.data &&
-                  props.data.__super !== prevProps.data.__super))
+            hasExprDataChanged ||
+            hasSuperChanged
           ) {
             store.initData(
               extendObject(props.data, {

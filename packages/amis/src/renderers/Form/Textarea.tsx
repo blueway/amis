@@ -66,6 +66,11 @@ export interface AMISTextareaSchema extends AMISFormItem {
    * 重置时的默认值
    */
   resetValue?: string;
+
+  /**
+   * 启用原生 textarea（跳过 react-textarea-autosize），适用于高频输入或扫码枪场景
+   */
+  nativeTextarea?: boolean;
 }
 
 export type TextAreaRendererEvent = 'blur' | 'focus' | 'change';

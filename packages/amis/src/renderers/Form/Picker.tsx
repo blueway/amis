@@ -203,7 +203,11 @@ export default class PickerControl extends React.PureComponent<
         this.toDispose.push(
           reaction(
             () => JSON.stringify(formItem?.tmpValue),
-            () => this.fetchOptions()
+            () => {
+              if (typeof this.props.source === 'string') {
+                this.fetchOptions();
+              }
+            }
           )
         );
     };
@@ -390,7 +394,16 @@ export default class PickerControl extends React.PureComponent<
       }
     });
 
-    additionalOptions.length && setOptions(options.concat(additionalOptions));
+    if (additionalOptions.length) {
+      const merged = options.concat(additionalOptions);
+      const changed =
+        merged.length !== options.length ||
+        merged.some(
+          (opt, i) =>
+            opt[valueField || 'value'] !== options[i]?.[valueField || 'value']
+        );
+      changed && setOptions(merged);
+    }
     const option = multiple ? items : items[0];
     const rendererEvent = await dispatchEvent(
       'change',

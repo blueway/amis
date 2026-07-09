@@ -415,7 +415,9 @@ export const CRUDStore = ServiceStore.named('CRUDStore')
           }
 
           const data = {
-            ...((api as ApiObject).replaceData ? {} : self.pristine),
+            ...((api as ApiObject).replaceData || !options.loadDataMode
+              ? {}
+              : self.pristine),
             items: rowsData,
             count: count,
             total: total,
