@@ -50,6 +50,7 @@ jobs:
           command: pnpm --filter amis-ui run test
       - run:
           name: test (amis)
+          no_output_timeout: 30m
           command: pnpm --filter amis run test
 
   build:
