@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build-and-test:
+  lint-and-test:
     docker:
       - image: cimg/node:20.19
     resource_class: large
@@ -22,27 +22,18 @@ jobs:
             sudo apt-get install -y -qq libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - restore_cache:
           keys:
-            - pnpm-store-v2
+            - pnpm-store-v3
       - run:
           name: pnpm install
           command: pnpm install --no-frozen-lockfile
       - save_cache:
-          key: pnpm-store-v2
+          key: pnpm-store-v3
           paths:
             - ~/.local/share/pnpm/store
             - ~/.pnpm-store
       - run:
           name: typescript check
           command: pnpm run typecheck
-      - run:
-          name: build packages
-          command: |
-            pnpm --filter amis-formula run build
-            pnpm --filter amis-core run build
-            pnpm --filter amis-ui run build
-            pnpm --filter amis run build
-            pnpm --filter amis-editor-core run build
-            pnpm --filter amis-editor run build
       - run:
           name: test
           command: |
@@ -52,7 +43,45 @@ jobs:
             pnpm test
             cd ../../
 
+  build:
+    docker:
+      - image: cimg/node:20.19
+    resource_class: large
+    environment:
+      NODE_OPTIONS: '--max-old-space-size=8192'
+    steps:
+      - checkout
+      - run:
+          name: Enable pnpm (corepack)
+          command: |
+            corepack enable
+            corepack prepare pnpm@10 --activate
+            pnpm --version
+      - restore_cache:
+          keys:
+            - pnpm-store-v3
+      - run:
+          name: pnpm install
+          command: pnpm install --no-frozen-lockfile
+      - save_cache:
+          key: pnpm-store-v3
+          paths:
+            - ~/.local/share/pnpm/store
+            - ~/.pnpm-store
+      - run:
+          name: build packages
+          command: |
+            pnpm --filter amis-formula run build
+            pnpm --filter amis-core run build
+            pnpm --filter amis-ui run build
+            pnpm --filter amis run build
+            pnpm --filter amis-editor-core run build
+            pnpm --filter amis-editor run build
+
 workflows:
   ci:
     jobs:
-      - build-and-test
+      - lint-and-test
+      - build:
+          requires:
+            - lint-and-test
