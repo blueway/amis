@@ -1,0 +1,51 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/node:20.19
+    resource_class: large
+    environment:
+      NODE_OPTIONS: '--max-old-space-size=8192'
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package.json" }}
+            - v1-deps-
+      - run:
+          name: npm install
+          command: |
+            npm i --legacy-peer-deps
+            cd packages/office-viewer
+            npm i --legacy-peer-deps
+            cd ../../
+      - save_cache:
+          key: v1-deps-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+            - packages/*/node_modules
+      - run:
+          name: build packages
+          command: |
+            npm run build --workspace amis-formula
+            npm run build --workspace amis-core
+            npm run build --workspace amis-ui
+            npm run build --workspace amis
+            npm run build --workspace amis-editor-core
+            npm run build --workspace amis-editor
+      - run:
+          name: typescript check
+          command: npm run typecheck
+      - run:
+          name: test
+          command: |
+            npm test --workspaces
+            cd packages/office-viewer
+            npm test
+            cd ../../
+
+workflows:
+  ci:
+    jobs:
+      - build-and-test
