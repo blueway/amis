@@ -42,6 +42,8 @@ import {ItemRenderStates} from './Selection';
 import VirtualList from './virtual-list';
 import TooltipWrapper from './TooltipWrapper';
 
+const FLATTEN_THRESHOLD = 500;
+
 interface IDropIndicator {
   left: number;
   top: number;
@@ -1081,10 +1083,42 @@ export class TreeSelector extends React.Component<
     props?: TreeSelectorProps,
     initial?: boolean
   ): void | Option[] {
-    let flattenedOptions: Option[] = [];
+    const options = props?.options || this.props.options;
 
+    if (
+      initial &&
+      Array.isArray(options) &&
+      options.length > FLATTEN_THRESHOLD
+    ) {
+      // Defer flattening for large trees so the first render is not blocked
+      this.state = {...this.state, flattenedOptions: []};
+      Promise.resolve().then(() => {
+        let opts: Option[] = [];
+        eachTree(
+          options,
+          (item, index, level, paths: Option[], indexes: Array<number>) => {
+            const parent = paths[paths.length - 1];
+            if (!isVisible(item)) {
+              return;
+            }
+            this.levels.set(item, level);
+            this.nodePaths.set(item, indexes.concat(index).join('-'));
+            parent && this.relations.set(item, parent);
+            if (paths.length === 0) {
+              opts.push(item);
+            } else if (this.isUnfolded(parent)) {
+              opts.push(item);
+            }
+          }
+        );
+        this.setState({flattenedOptions: opts});
+      });
+      return;
+    }
+
+    let flattenedOptions: Option[] = [];
     eachTree(
-      props?.options || this.props.options,
+      options,
       (item, index, level, paths: Option[], indexes: Array<number>) => {
         const parent = paths[paths.length - 1];
         if (!isVisible(item)) {
