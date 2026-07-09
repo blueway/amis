@@ -1,0 +1,8 @@
+packages:
+  - 'packages/amis-formula'
+  - 'packages/amis-core'
+  - 'packages/amis-ui'
+  - 'packages/amis'
+  - 'packages/amis-editor-core'
+  - 'packages/amis-editor'
+  - 'packages/amis-theme-editor-helper'

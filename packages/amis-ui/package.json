@@ -65,7 +65,7 @@
     "rc-menu": "^9.12.2",
     "rc-progress": "3.4.2",
     "react-color": "^2.19.3",
-    "react-draggable": "^4.4.5",
+    "react-draggable": "4.4.6",
     "react-hook-form": "7.39.0",
     "react-intersection-observer": "9.5.2",
     "react-json-view": "1.21.3",

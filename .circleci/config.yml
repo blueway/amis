@@ -9,40 +9,44 @@ jobs:
       NODE_OPTIONS: '--max-old-space-size=8192'
     steps:
       - checkout
+      - run:
+          name: Enable pnpm (corepack)
+          command: |
+            corepack enable
+            corepack prepare pnpm@9 --activate
+            pnpm --version
       - restore_cache:
           keys:
-            - v1-deps-{{ checksum "package.json" }}
-            - v1-deps-
+            - pnpm-store-v1-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-store-v1-
       - run:
-          name: npm install
-          command: |
-            npm i --legacy-peer-deps
-            cd packages/office-viewer
-            npm i --legacy-peer-deps
-            cd ../../
+          name: pnpm install
+          command: pnpm install --legacy-peer-deps --frozen-lockfile=false
       - save_cache:
-          key: v1-deps-{{ checksum "package.json" }}
+          key: pnpm-store-v1-{{ checksum "pnpm-lock.yaml" }}
           paths:
+            - ~/.local/share/pnpm/store
             - node_modules
             - packages/*/node_modules
       - run:
           name: build packages
           command: |
-            npm run build --workspace amis-formula
-            npm run build --workspace amis-core
-            npm run build --workspace amis-ui
-            npm run build --workspace amis
-            npm run build --workspace amis-editor-core
-            npm run build --workspace amis-editor
+            pnpm --filter amis-formula run build
+            pnpm --filter amis-core run build
+            pnpm --filter amis-ui run build
+            pnpm --filter amis run build
+            pnpm --filter amis-editor-core run build
+            pnpm --filter amis-editor run build
       - run:
           name: typescript check
-          command: npm run typecheck
+          command: pnpm run typecheck
       - run:
           name: test
           command: |
-            npm test --workspaces
+            pnpm -r --if-present test
             cd packages/office-viewer
-            npm test
+            pnpm install --legacy-peer-deps
+            pnpm test
             cd ../../
 
 workflows:
