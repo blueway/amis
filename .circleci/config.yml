@@ -41,8 +41,9 @@ jobs:
             pnpm --filter amis-core run build
       - run:
           name: test
+          no_output_timeout: 30m
           command: |
-            pnpm -r --if-present test
+            pnpm -r --if-present --workspace-concurrency 2 test
             cd packages/office-viewer
             pnpm install --no-frozen-lockfile
             pnpm test

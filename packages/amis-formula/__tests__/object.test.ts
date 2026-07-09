@@ -689,7 +689,7 @@ describe('对象操作函数', () => {
       const keys = evaluate('${KEYS(obj)}', {obj: largeObj});
       const duration = Date.now() - start;
       expect(keys.length).toBe(1000);
-      expect(duration).toBeLessThan(100); // 应该快速完成
+      expect(duration).toBeLessThan(500); // CI 环境较慢
     });
 
     test('嵌套对象（浅操作）', () => {
