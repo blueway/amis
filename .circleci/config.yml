@@ -48,6 +48,8 @@ jobs:
           command: pnpm --filter amis-ui run test
       - run:
           name: test amis
+          environment:
+            NODE_OPTIONS: '--max-old-space-size=4096'
           command: pnpm --filter amis run test
 
   build:
