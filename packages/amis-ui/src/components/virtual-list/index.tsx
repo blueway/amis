@@ -167,6 +167,8 @@ export default class VirtualList extends React.PureComponent<Props, State> {
 
   private styleCache: StyleCache = {};
 
+  private _raf: number | null = null;
+
   componentDidMount() {
     const {scrollOffset, scrollToIndex} = this.props;
     this.rootNode.addEventListener('scroll', this.handleScroll, {
@@ -271,6 +273,7 @@ export default class VirtualList extends React.PureComponent<Props, State> {
   }
 
   componentWillUnmount() {
+    this._raf && cancelAnimationFrame(this._raf);
     this.rootNode.removeEventListener('scroll', this.handleScroll);
   }
 
@@ -408,14 +411,18 @@ export default class VirtualList extends React.PureComponent<Props, State> {
       return;
     }
 
-    this.setState({
-      offset,
-      scrollChangeReason: SCROLL_CHANGE_REASON.OBSERVED
-    });
+    this._raf && cancelAnimationFrame(this._raf);
+    this._raf = requestAnimationFrame(() => {
+      this._raf = null;
+      this.setState({
+        offset,
+        scrollChangeReason: SCROLL_CHANGE_REASON.OBSERVED
+      });
 
-    if (typeof onScroll === 'function') {
-      onScroll(offset, event);
-    }
+      if (typeof onScroll === 'function') {
+        onScroll(offset, event);
+      }
+    });
   };
 
   private getNodeOffset() {

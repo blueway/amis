@@ -18,7 +18,7 @@ function VirtualTableBody(props: VirtualTableBodyProps) {
   const itemHeight = React.useRef(44);
   const sizeRef = React.useRef(20);
 
-  const buffer = 10;
+  const buffer = 20;
   // get range
   const [from, to] = React.useMemo(() => {
     let from = 0;
@@ -121,7 +121,7 @@ function VirtualTableBody(props: VirtualTableBodyProps) {
             document.documentElement : getScrollParent(rootDom as HTMLElement));
         scrollTop = scrollContainer.scrollTop || 0;
       }
-      setScrollTop(scrollTop);
+      startTransition(() => setScrollTop(scrollTop));
       if (scrollTop && store.tableLayout !== 'fixed') {
         store.switchToFixedLayout();
       }
@@ -165,7 +165,7 @@ function VirtualTableBody(props: VirtualTableBodyProps) {
             Math.min(isAutoFill ? wrap.clientHeight : window.innerHeight) /
               itemHeight.current
           ),
-          20
+          40
         );
         check();
       })
