@@ -97,7 +97,11 @@ export default class OfficeViewer extends React.Component<
 
     if (props.name) {
       if (prevProps.data[props.name] !== props.data[props.name]) {
-        this.renderWord();
+        if (props.wordOptions?.enableVar) {
+          this.office?.updateVariable();
+        } else {
+          this.renderWord();
+        }
       }
     }
 
@@ -110,16 +114,7 @@ export default class OfficeViewer extends React.Component<
     }
 
     if (props.wordOptions?.enableVar) {
-      if (
-        props.trackExpression &&
-        filter(props.trackExpression, props.data) !==
-          filter(prevProps.trackExpression, prevProps.data)
-      ) {
-        this.renderWord();
-      } else {
-        // 默认只更新变量提升性能
-        this.office?.updateVariable();
-      }
+      this.office?.updateVariable();
     }
   }
 
