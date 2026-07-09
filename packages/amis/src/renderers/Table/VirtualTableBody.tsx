@@ -80,7 +80,7 @@ function VirtualTableBody(props: VirtualTableBodyProps) {
       let virtualHeight = 0;
       offsetHeight = 0;
       rows.forEach((item, index) => {
-        const row: IRow = (item as React.ReactElement)?.props?.item;
+        const row: any = (item as React.ReactElement)?.props?.item;
         const height = row?.height || itemHeight.current;
 
         totalHeight += height;
