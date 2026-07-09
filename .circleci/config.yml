@@ -15,12 +15,20 @@ jobs:
             corepack enable
             corepack prepare pnpm@10 --activate
             pnpm --version
+      - run:
+          name: Install system deps for native modules
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - restore_cache:
           keys:
             - pnpm-store-v2
       - run:
           name: pnpm install
           command: pnpm install --no-frozen-lockfile
+      - run:
+          name: Rebuild canvas native module
+          command: pnpm rebuild canvas 2>/dev/null || true
       - save_cache:
           key: pnpm-store-v2
           paths:
@@ -40,11 +48,6 @@ jobs:
             pnpm --filter amis run build
             pnpm --filter amis-editor-core run build
             pnpm --filter amis-editor run build
-      - run:
-          name: Install system deps for canvas native module
-          command: |
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - run:
           name: test
           command: |
