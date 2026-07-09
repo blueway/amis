@@ -3,10 +3,12 @@
   "compilerOptions": {
     "paths": {
       "amis-core": ["./packages/amis-core/src/index.tsx"],
+      "packages/amis-core/lib": ["./packages/amis-core/src/index.tsx"],
       "amis-formula": ["./packages/amis-formula/src/index.ts"],
       "amis-ui": ["./packages/amis-ui/src/index.tsx"],
       "amis": ["./packages/amis/src/index.tsx"],
       "amis-editor-core": ["./packages/amis-editor-core/src/index.ts"],
+      "packages/amis-editor-core/lib": ["./packages/amis-editor-core/src/index.ts"],
       "amis-editor": ["./packages/amis-editor/src/index.tsx"],
       "amis-theme-editor-helper": [
         "./packages/amis-theme-editor-helper/src/index.ts"
