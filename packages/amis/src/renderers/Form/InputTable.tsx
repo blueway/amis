@@ -38,6 +38,7 @@ import {
 } from 'amis-core';
 import {Button, Icon} from 'amis-ui';
 import omit from 'lodash/omit';
+import isEqual from 'lodash/isEqual';
 import findIndex from 'lodash/findIndex';
 import {BaseTableSchema, TableSchema} from '../Table';
 import {SchemaApi, AMISClassName} from '../../Schema';
@@ -1825,6 +1826,12 @@ export default class FormTable<
             const value: any = {
               ...rows
             };
+
+            // 新值与当前行完全一致时跳过 setState，避免整表级联重渲染
+            if (isEqual(origin, value)) {
+              return null;
+            }
+
             const originItems = items;
             items = spliceTree(items, indexes, 1, value);
             this.reUseRowId(items, originItems, indexes);
@@ -1850,6 +1857,13 @@ export default class FormTable<
           const indexes = (rowIndexes as string)
             .split('.')
             .map(item => parseInt(item, 10));
+
+          const origin = getTree(items, indexes);
+
+          // 行数据未发生变化时跳过 setState，避免整表级联重渲染
+          if (origin && !Array.isArray(rows) && isEqual(origin, rows)) {
+            return null;
+          }
 
           // const origin = getTree(items, indexes);
 
