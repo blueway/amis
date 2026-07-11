@@ -400,13 +400,13 @@ export class TableBody<
       translate: __
     } = this.props;
 
-    const prefixDoms = flatten(
+    const prefixDoms: React.ReactNode[] = flatten(
       (this.renderSummary('prefix', prefixRow) as any) || []
-    ).filter(Boolean);
+    ).filter(Boolean) as React.ReactNode[];
 
-    const affixDoms = flatten(
+    const affixDoms: React.ReactNode[] = flatten(
       (this.renderSummary('affix', affixRow) as any) || []
-    ).filter(Boolean);
+    ).filter(Boolean) as React.ReactNode[];
 
     if (rows.length > store.lazyRenderAfter) {
       return (
@@ -422,11 +422,11 @@ export class TableBody<
       );
     }
 
-    const doms = [
+    const doms: React.ReactNode[] = [
       ...prefixDoms,
-      ...flatten(
+      ...(flatten(
         (this.renderRows(rows, columns, rowsProps) as any) || []
-      ).filter(Boolean),
+      ).filter(Boolean) as React.ReactNode[]),
       ...affixDoms
     ];
 

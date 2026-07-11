@@ -28,7 +28,7 @@ function getRowHeight(
   }
   const dataIdx = i - prefixLen;
   if (dataIdx < dataRows.length) {
-    return dataRows[dataIdx]?.height || fallback;
+    return (dataRows[dataIdx] as any)?.height || fallback;
   }
   const affixIdx = dataIdx - dataRows.length;
   if (affixIdx < affixLen) {
