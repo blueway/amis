@@ -166,15 +166,21 @@ export const Column = types
     },
 
     setMinWidth(value: number) {
-      self.minWidth = value;
+      if (self.minWidth !== value) {
+        self.minWidth = value;
+      }
     },
 
     setWidth(value: number) {
-      self.width = value;
+      if (self.width !== value) {
+        self.width = value;
+      }
     },
 
     setRealWidth(value: number) {
-      self.realWidth = value;
+      if (self.realWidth !== value) {
+        self.realWidth = value;
+      }
     },
     markAppeared(value: boolean) {
       self.appeared = self.appeared || value;
