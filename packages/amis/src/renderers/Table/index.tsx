@@ -2903,6 +2903,9 @@ export default class Table<
     store.rows.length;
     store.orderBy;
     store.orderDir;
+    // 只取一次 items，避免 renderTableContent 内多次访问 store.items
+    // 每次访问都会 self.rows.concat() 做 O(n) 拷贝（n 很大时明显）
+    const items = store.items;
 
     return (
       <>
@@ -2915,7 +2918,7 @@ export default class Table<
               'Table-table--affixHeader':
                 affixHeader && !autoFillHeight && store.columnWidthReady,
               'Table-table--tableFillHeight':
-                autoFillHeight && !store.items.length
+                autoFillHeight && !items.length
             },
             tableClassName
           )}
@@ -2926,7 +2929,7 @@ export default class Table<
           classnames={cx}
           columns={store.filteredColumns}
           columnsGroup={store.columnGroup}
-          rows={store.items} // store.rows 是没有变更的，所以不会触发更新
+          rows={items} // store.rows 是没有变更的，所以不会触发更新
           placeholder={placeholder}
           render={render}
           onMouseMove={
