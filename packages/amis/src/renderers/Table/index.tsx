@@ -1,6 +1,7 @@
 import React from 'react';
 import {isAlive} from 'mobx-state-tree';
 import {reaction} from 'mobx';
+import {observer} from 'mobx-react';
 import Sortable from 'sortablejs';
 import isEqual from 'lodash/isEqual';
 import find from 'lodash/find';
@@ -531,6 +532,7 @@ export type TableRendererAction =
   | 'initDrag'
   | 'cancelDrag';
 
+@observer
 export default class Table<
   T extends TableProps = TableProps
 > extends React.Component<T, object> {
