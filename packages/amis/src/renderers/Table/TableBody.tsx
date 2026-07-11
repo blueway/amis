@@ -77,11 +77,13 @@ export class TableBody<
     return this.props.testIdBuilder?.getChild(`row-${rowPath}`);
   }
 
-  renderRows(
-    rows: Array<any>,
-    columns = this.props.columns,
+  renderSingleRow(
+    item: IRow,
+    rowIndex: number,
+    columns: any = this.props.columns,
     rowProps: any = {},
-    indexPath?: string
+    indexPath?: string,
+    isLastRow?: boolean
   ): any {
     const {
       rowClassName,
@@ -105,100 +107,117 @@ export class TableBody<
       store
     } = this.props;
 
-    return rows.map((item: IRow, rowIndex: number) => {
-      const itemProps = buildItemProps ? buildItemProps(item, rowIndex) : null;
-      const rowPath = `${indexPath ? indexPath + '/' : ''}${rowIndex}`;
+    const itemProps = buildItemProps ? buildItemProps(item, rowIndex) : null;
+    const rowPath = `${indexPath ? indexPath + '/' : ''}${rowIndex}`;
 
-      const doms = [
-        <TableRow
-          {...itemProps}
-          testIdBuilder={this.testIdBuilder}
-          store={store}
-          itemAction={itemAction}
-          classnames={cx}
-          checkOnItemClick={checkOnItemClick}
-          key={item.id}
-          itemIndex={rowIndex}
-          rowPath={rowPath}
-          item={item}
-          itemClassName={cx(
-            rowClassNameExpr
-              ? filter(rowClassNameExpr, item.locals)
-              : rowClassName,
-            {
-              'is-last':
-                item.depth > 1 &&
-                rowIndex === rows.length - 1 &&
-                !item.children.length
-            }
-          )}
-          columns={columns}
-          renderCell={renderCell}
-          render={render}
-          onAction={onAction}
-          onCheck={onCheck}
-          // todo 先注释 quickEditEnabled={item.depth === 1}
-          onQuickChange={onQuickChange}
-          onRowClick={onRowClick}
-          onRowDbClick={onRowDbClick}
-          onRowMouseEnter={onRowMouseEnter}
-          onRowMouseLeave={onRowMouseLeave}
-          {...rowProps}
-        />
-      ];
+    const doms = [
+      <TableRow
+        {...itemProps}
+        testIdBuilder={this.testIdBuilder}
+        store={store}
+        itemAction={itemAction}
+        classnames={cx}
+        checkOnItemClick={checkOnItemClick}
+        key={item.id}
+        itemIndex={rowIndex}
+        rowPath={rowPath}
+        item={item}
+        itemClassName={cx(
+          rowClassNameExpr
+            ? filter(rowClassNameExpr, item.locals)
+            : rowClassName,
+          {
+            'is-last':
+              item.depth > 1 &&
+              isLastRow &&
+              !item.children.length
+          }
+        )}
+        columns={columns}
+        renderCell={renderCell}
+        render={render}
+        onAction={onAction}
+        onCheck={onCheck}
+        onQuickChange={onQuickChange}
+        onRowClick={onRowClick}
+        onRowDbClick={onRowDbClick}
+        onRowMouseEnter={onRowMouseEnter}
+        onRowMouseLeave={onRowMouseLeave}
+        {...rowProps}
+      />
+    ];
 
-      if (footable && footableColumns.length) {
-        if (item.depth === 1) {
-          doms.push(
-            <TableRow
-              {...itemProps}
-              store={store}
-              itemAction={itemAction}
-              classnames={cx}
-              checkOnItemClick={checkOnItemClick}
-              key={`foot-${item.id}`}
-              itemIndex={rowIndex}
-              rowPath={rowPath}
-              item={item}
-              itemClassName={cx(
-                rowClassNameExpr
-                  ? filter(rowClassNameExpr, item.locals)
-                  : rowClassName
-              )}
-              columns={footableColumns}
-              renderCell={renderCell}
-              render={render}
-              onAction={onAction}
-              onCheck={onCheck}
-              onRowClick={onRowClick}
-              onRowDbClick={onRowDbClick}
-              onRowMouseEnter={onRowMouseEnter}
-              onRowMouseLeave={onRowMouseLeave}
-              footableMode
-              footableColSpan={columns.length}
-              onQuickChange={onQuickChange}
-              ignoreFootableContent={ignoreFootableContent}
-              {...rowProps}
-              testIdBuilder={this.testIdBuilder}
-            />
-          );
-        }
-      } else if (item.children.length && item.expanded) {
-        // 嵌套表格
+    if (footable && footableColumns.length) {
+      if (item.depth === 1) {
         doms.push(
-          ...this.renderRows(
-            item.children,
-            columns,
-            {
-              ...rowProps,
-              parent: item
-            },
-            rowPath
-          )
+          <TableRow
+            {...itemProps}
+            store={store}
+            itemAction={itemAction}
+            classnames={cx}
+            checkOnItemClick={checkOnItemClick}
+            key={`foot-${item.id}`}
+            itemIndex={rowIndex}
+            rowPath={rowPath}
+            item={item}
+            itemClassName={cx(
+              rowClassNameExpr
+                ? filter(rowClassNameExpr, item.locals)
+                : rowClassName
+            )}
+            columns={footableColumns}
+            renderCell={renderCell}
+            render={render}
+            onAction={onAction}
+            onCheck={onCheck}
+            onRowClick={onRowClick}
+            onRowDbClick={onRowDbClick}
+            onRowMouseEnter={onRowMouseEnter}
+            onRowMouseLeave={onRowMouseLeave}
+            footableMode
+            footableColSpan={columns.length}
+            onQuickChange={onQuickChange}
+            ignoreFootableContent={ignoreFootableContent}
+            {...rowProps}
+            testIdBuilder={this.testIdBuilder}
+          />
         );
       }
-      return doms;
-    });
+    } else if (item.children.length && item.expanded) {
+      item.children.forEach((child: IRow, childIndex: number) => {
+        const childEls = this.renderSingleRow(
+          child,
+          childIndex,
+          columns,
+          {
+            ...rowProps,
+            parent: item
+          },
+          rowPath,
+          childIndex === item.children.length - 1
+        );
+        doms.push(...(Array.isArray(childEls) ? childEls : [childEls]));
+      });
+    }
+    return doms;
+  }
+
+  renderRows(
+    rows: Array<any>,
+    columns = this.props.columns,
+    rowProps: any = {},
+    indexPath?: string
+  ): any {
+    return rows.map((item: IRow, rowIndex: number) =>
+      this.renderSingleRow(
+        item,
+        rowIndex,
+        columns,
+        rowProps,
+        indexPath,
+        rowIndex === rows.length - 1
+      )
+    );
   }
 
   renderSummaryRow(
@@ -381,17 +400,36 @@ export class TableBody<
       translate: __
     } = this.props;
 
-    const doms: React.ReactNode[] = flatten(
-      []
-        .concat(this.renderSummary('prefix', prefixRow) as any)
-        .concat(this.renderRows(rows, columns, rowsProps) as any)
-        .concat(this.renderSummary('affix', affixRow) as any)
+    const prefixDoms = flatten(
+      (this.renderSummary('prefix', prefixRow) as any) || []
     ).filter(Boolean);
 
-    return rows.length > store.lazyRenderAfter ? (
-      <VirtualTableBody rows={doms} store={this.props.store} />
-    ) : (
-      <tbody className={className}>{doms}</tbody>
-    );
+    const affixDoms = flatten(
+      (this.renderSummary('affix', affixRow) as any) || []
+    ).filter(Boolean);
+
+    if (rows.length > store.lazyRenderAfter) {
+      return (
+        <VirtualTableBody
+          prefixRows={prefixDoms}
+          affixRows={affixDoms}
+          dataRows={rows}
+          renderRow={(item: IRow, rowIndex: number) =>
+            this.renderSingleRow(item, rowIndex, columns, rowsProps)
+          }
+          store={this.props.store}
+        />
+      );
+    }
+
+    const doms = [
+      ...prefixDoms,
+      ...flatten(
+        (this.renderRows(rows, columns, rowsProps) as any) || []
+      ).filter(Boolean),
+      ...affixDoms
+    ];
+
+    return <tbody className={className}>{doms}</tbody>;
   }
 }
